@@ -1,53 +1,108 @@
 # Recebe um número e retorna uma lista dos números primos até o número indicado, além de contar quantos números primos existem até o número dado.
 
-def conta_restos (numero):
-    """Conta quantos restos zero existem de um número até 1.
+# Versão otimizada, evitando cálculos desnecessários e utiliza melhor os conceitos matemáticos que determinam se um número é primo ou não.
+
+def conta_divisores(numero):
+    """Conta a quantidade de divisores inteiros positivos de um número.
+
+    Realiza a contagem de divisores de forma otimizada, verificando apenas até
+    a raiz quadrada do número e contando pares de divisores.
 
     Args:
-        numero (int): Valor máximo para exibição dos números primos.
+        numero (int): O número inteiro positivo a ser analisado.
 
     Returns:
-        Quantos restos zero o número tem até a divisão por 1. Vai ser útil pra dizer se um número é primo ou não.
-    """
-    divisor = numero
-    contador_resto = 0
-    while divisor > 0:
-        resto = numero % divisor
-        if resto == 0:
-            contador_resto += 1
-        divisor -= 1
-    return contador_resto
+        int: Quantidade total de divisores do número.
+             Retorna 0 se o número for menor que 2.
 
-def numeros_primos (numero):
-    """Avalia se um número é primo, ou seja, só é divisível (resto zero) por ele mesmo e por 1
+    Examples:
+        >>> conta_divisores(7)
+        2
+        >>> conta_divisores(12)
+        6
+    """
+    if numero < 2:
+        return 0
+    contador = 2  # 1 e o próprio número
+    for divisor in range(2, int(numero**0.5) + 1):
+        if numero % divisor == 0:
+            if divisor == numero // divisor:  # Caso de quadrado perfeito
+                contador += 1
+            else:
+                contador += 2
+    return contador
+
+
+def encontra_primos(limite):
+    """Gera uma lista de números primos até um determinado limite.
+
+    Utiliza a função conta_divisores() para identificar números primos de forma
+    eficiente, considerando apenas números ímpares após o 2.
 
     Args:
-        numero (int): Valor máximo até onde irá verificar se o número é primo ou não
+        limite (int): Valor máximo (inclusive) para a busca de números primos.
 
     Returns:
-        Lista: com números primos
-    """
-    numeros_primos = []
-    for x in range(2,numero+1):
-        restos = conta_restos(x)
-        if restos >= 0 and restos <= 2:
-            numeros_primos.append(x)
-    return numeros_primos
+        list: Lista contendo todos os números primos encontrados até o limite,
+              em ordem crescente. Retorna lista vazia se limite < 2.
 
-def imprime_numeros_primos (numero):
-    """Exibe os números primos até um número limite e o total encontrado.
+    Raises:
+        TypeError: Se o limite não for um número inteiro.
 
-    Args:
-        numero (int): Valor máximo para exibição dos números primos.
+    Examples:
+        >>> encontra_primos(20)
+        [2, 3, 5, 7, 11, 13, 17, 19]
     """
-    lista_numeros_primos = numeros_primos(numero)
+    if not isinstance(limite, int):
+        raise TypeError("O limite deve ser um número inteiro")
     
-    for numero_primo in lista_numeros_primos:
-        print(numero_primo)
+    if limite < 2:
+        return []
+    
+    primos = [2]
+    for candidato in range(3, limite + 1, 2):  # Verifica apenas ímpares
+        if conta_divisores(candidato) == 2:
+            primos.append(candidato)
+    return primos
 
-numero = int(input("Digite até qual número você deseja verificar se é primo: "))
 
-print(f"\nA lista de números primos até {numero} é:")
-imprime_numeros_primos(numero)
+def imprime_primos(limite):
+    """Exibe os números primos até um limite e o total encontrado.
 
-print(f"\nA quantidade total de números primos até o número {numero} é:", len(numeros_primos(numero)))
+    Formata a saída para mostrar os números primos separados por vírgula
+    e o total de primos encontrados.
+
+    Args:
+        limite (int): Valor máximo para exibição dos números primos.
+
+    Examples:
+        >>> imprime_primos(10)
+        Números primos até 10:
+        2, 3, 5, 7
+        Total de primos encontrados: 4
+    """
+    primos = encontra_primos(limite)
+    print(f"\nNúmeros primos até {limite}:")
+    print(*primos, sep=', ')
+    print(f"\nTotal de primos encontrados: {len(primos)}")
+
+
+def main():
+    """Função principal que orquestra a execução do programa.
+
+    Solicita entrada do usuário, valida o valor informado e executa
+    a exibição dos números primos até o limite especificado.
+
+    Trata erros de entrada e fornece feedback adequado ao usuário.
+    """
+    try:
+        limite = int(input("Digite até qual número deseja verificar primos: "))
+        if limite < 2:
+            print("Por favor, digite um número maior ou igual a 2.")
+            return
+        imprime_primos(limite)
+    except ValueError:
+        print("Entrada inválida. Por favor, digite um número inteiro.")
+
+if __name__ == "__main__":
+    main()
